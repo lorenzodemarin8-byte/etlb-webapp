@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITA Airways eTLB</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-main: #e6ebf1;
+            --bg-card: #ffffff;
+            --bg-hover: #f3f4f6;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --ita-blue: #005cb9;
+            --ita-blue-hover: #00468f;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #121212;
+            --bg-card: #1e1e1e;
+            --bg-hover: #2c2c2c;
+            --text-main: #e5e5e5;
+            --text-muted: #9ca3af;
+            --border-color: #333333;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+
+        /* --- NAVBAR --- */
+        .navbar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background-color: var(--bg-card); padding: 12px 24px; 
+            border-bottom: 1px solid var(--border-color); 
+            position: relative; z-index: 1000; transition: 0.3s;
+        }
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .menu-btn { background: transparent; border: none; color: var(--ita-blue); cursor: pointer; font-size: 20px; transition: 0.2s; }
+        .menu-btn:hover { color: var(--ita-blue-hover); }
+        
+        .nav-center { display: flex; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text-main); letter-spacing: 0.3px;}
+        .nav-right { display: flex; align-items: center; gap: 20px; font-size: 14px; font-weight: 600; }
+        .theme-toggle { background: transparent; border: none; color: var(--text-main); font-size: 18px; cursor: pointer; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            position: fixed; top: 57px; left: -250px; width: 250px; height: calc(100vh - 57px);
+            background-color: var(--bg-card); transition: left 0.3s ease; z-index: 900;
+            padding-top: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.05); border-right: 1px solid var(--border-color);
+        }
+        .sidebar.open { left: 0; }
+        .menu-item {
+            padding: 15px 24px; font-size: 14px; font-weight: 600; color: var(--ita-blue);
+            cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s;
+        }
+        .menu-item:hover, .menu-item.active { background-color: var(--bg-hover); border-right: 3px solid var(--ita-blue); }
+
+        /* --- MAIN CONTAINER --- */
+        .container { max-width: 1100px; margin: 35px auto; padding: 0 20px; transition: 0.3s; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-size: 18px; font-weight: 600; }
+        
+        .btn-primary { background-color: var(--ita-blue); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-primary:hover { background-color: var(--ita-blue-hover); }
+        .btn-primary.disabled { background-color: var(--border-color); color: var(--text-muted); cursor: not-allowed; pointer-events: none; }
+        
+        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .btn-secondary:hover { background-color: var(--bg-hover); }
+
+        /* --- LISTE --- */
+        .section-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; margin-top: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .card-list { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: 0.3s; }
+        .list-item { padding: 16px 20px; border-bottom: 1px solid var(--border-color); font-size: 14px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .list-item:last-child { border-bottom: none; }
+        .list-item.clickable { cursor: pointer; }
+        .list-item.clickable:hover { background-color: var(--bg-hover); }
+        
+        .mel-badge { background-color: rgba(245, 158, 11, 0.15); color: var(--warning); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.5); margin-right: 8px; }
+        .role-badge { background-color: rgba(128,128,128,0.1); color: var(--text-main); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid var(--border-color); }
+
+        /* --- TASKS --- */
+        .task-item { border-left: 4px solid var(--danger); transition: border-color 0.3s; }
+        .task-item.success { border-left-color: var(--success); }
+        .task-item.warning { border-left-color: var(--warning); }
+        
+        .flight-data-grid { display: grid; grid-template-columns: 100px 150px 100px; gap: 15px; text-align: left; }
+        .fd-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .fd-value { font-size: 13px; font-weight: 600; color: var(--text-main); }
+
+        /* --- CARDS & FORMS --- */
+        .fuel-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow); }
+        .fuel-row { display: flex; justify-content: space-between; gap: 30px; margin-bottom: 20px; }
+        .fuel-group { flex: 1; }
+        .fuel-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+        
+        .input-with-unit { position: relative; display: flex; align-items: center; }
+        .input-with-unit input, .input-with-unit select { width: 100%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-size: 14px; outline: none; font-weight: 600; }
+        .input-with-unit input:focus, .input-with-unit select:focus { border-color: var(--ita-blue); }
+        .input-with-unit .unit { position: absolute; right: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; pointer-events: none; }
+        
+        .fuel-divider { height: 1px; background-color: var(--border-color); margin: 25px 0; }
+
+        /* --- DETTAGLIO MEL --- */
+        .detail-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; margin-top: 20px; box-shadow: var(--shadow); }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 25px; font-size: 14px; }
+        .detail-label { color: var(--text-muted); margin-bottom: 6px; font-size: 12px; font-weight: 500; display: block; text-transform: uppercase; }
+        .detail-value { font-weight: 600; color: var(--text-main); }
+        .horizontal-divider { height: 1px; background-color: var(--border-color); margin: 30px 0; }
+        
+        /* --- MODAL --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; width: 450px; padding: 25px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 25px; font-weight: 600; font-size: 18px; }
+        
+        .input-group { margin-bottom: 18px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+        .input-group input, .input-group select { width: 100%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-size: 14px; outline: none; }
+
+        .view { display: none; }
+        .view.active { display: block; }
+        
+        .sec-btn { background: transparent; border: none; color: var(--text-main); cursor: pointer; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .sec-btn.selected { background: var(--ita-blue); color: white; }
+        .sec-btn:hover:not(.selected) { background: var(--bg-hover); }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="nav-left">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+        <div class="nav-center" id="nav-flight-info">
+            <span>20/08/2026</span>
+            <span>EI-INB</span>
+            <span>A20N</span>
+            <span>Y180</span>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-sun"></i></button>
+            <span>L. Demarin</span>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="menu-item" onclick="switchView('view-init', this)"><i class="fas fa-plane"></i> Flight Init</div>
+        <div class="menu-item active" onclick="switchView('view-status', this)"><i class="fas fa-clipboard-list"></i> Aircraft Status Report</div>
+        <div class="menu-item" onclick="switchView('view-preflight', this)"><i class="fas fa-tasks"></i> Pre-Flight</div>
+        <div class="menu-item" onclick="switchView('view-postflight', this)"><i class="fas fa-clipboard-check"></i> Post-Flight</div>
+    </div>
+
+    <div class="container" id="main-container">
+        
+        <!-- VISTA 0: FLIGHT INIT -->
+        <div id="view-init" class="view">
+            <div class="page-header"><div class="page-title">Flight Init</div></div>
+            <div class="card-list"><div class="list-item" style="color: var(--text-muted);">Pagina in costruzione...</div></div>
+        </div>
+
+        <!-- VISTA 1: AIRCRAFT STATUS REPORT -->
+        <div id="view-status" class="view active">
+            <div class="page-header">
+                <div class="page-title">Aircraft Status Report</div>
+                <button class="btn-primary" onclick="openStartModal()">START FLIGHT</button>
+            </div>
+
+            <div class="section-title">Next Due Maintenance Events</div>
+            <div class="card-list"><div class="list-item" style="color: var(--text-muted); font-style: italic;">no items</div></div>
+
+            <div class="section-title">Aircraft Downgrades/Limitations</div>
+            <div class="card-list"><div class="list-item" style="color: var(--text-muted);"><i class="fas fa-file-alt"></i> &nbsp; Aircraft Downgrades/Limitations <span style="float: right;">no items</span></div></div>
+
+            <div class="section-title">
+                MEL Complaints <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openAddMelModal()">+ ADD</button>
+            </div>
+            <div class="card-list" id="mel-container"></div>
+
+            <div class="section-title">DD HIL Complaints</div>
+            <div class="card-list"><div class="list-item" style="color: var(--text-muted); font-style: italic;">no items</div></div>
+
+            <div class="section-title">Technical Service Notices to Crew</div>
+            <div class="card-list"><div class="list-item" style="color: var(--text-muted);"><i class="fas fa-info-circle"></i> &nbsp; Technical Service Notices to Crew <span style="float: right;">no items</span></div></div>
+
+            <div class="section-title">Last Release to Service (CRS)</div>
+            <div class="card-list"><div class="list-item" style="color: var(--text-muted);"><i class="fas fa-stamp"></i> &nbsp; Last Crs <span style="float: right;">no items</span></div></div>
+
+            <div class="section-title">Other Information</div>
+            <div class="card-list">
+                <div class="list-item" style="color: var(--text-muted);">
+                    <span><i class="fas fa-check-circle"></i> &nbsp; Closed Items</span>
+                    <span style="font-weight: 600;">no items</span>
+                </div>
+                <div class="list-item" style="color: var(--text-muted);">
+                    <span><i class="fas fa-chair"></i> &nbsp; Cabin Items</span>
+                    <span style="font-weight: 600;">no items</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 2: DETTAGLIO MEL -->
+        <div id="view-mel-detail" class="view">
+            <div class="page-header">
+                <button class="btn-secondary" style="border: none;" onclick="switchView('view-status', document.querySelectorAll('.menu-item')[1])"><i class="fas fa-arrow-left"></i> OVERVIEW</button>
+                <div class="page-title">Workorder Detail</div>
+                <div style="width: 100px;"></div>
+            </div>
+
+            <div class="detail-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <span id="detail-wo" style="font-size: 22px; font-weight: 700; margin-right: 15px;">WO.-----</span>
+                            <span class="mel-badge">DEFERRED</span>
+                            <span class="role-badge">Pilot</span>
+                        </div>
+                        <div id="detail-desc" style="font-size: 16px; font-weight: 500;">---</div>
+                    </div>
+                </div>
+
+                <div class="detail-grid">
+                    <div><span class="detail-label">Opened</span><span class="detail-value" id="detail-opened">--</span></div>
+                    <div><span class="detail-label">Due at</span><span class="detail-value" id="detail-due">--</span></div>
+                    <div><span class="detail-label">Issue Station</span><span class="detail-value" id="detail-issue-sta">LIRF</span></div>
+                    
+                    <div><span class="detail-label">ATA</span><span class="detail-value" id="detail-ata">--</span></div>
+                    <div><span class="detail-label">To Go</span><span class="detail-value" id="detail-togo">--</span></div>
+                    <div><span class="detail-label">Def. Value</span><span class="detail-value" id="detail-def-val">--</span></div>
+                </div>
+
+                <div class="horizontal-divider"></div>
+
+                <div class="detail-grid">
+                    <div><span class="detail-label">MEL Ref</span><span class="detail-value" id="detail-melref">--</span></div>
+                    <div><span class="detail-label">Deferral Category</span><span class="detail-value" id="detail-cat">MEL D</span></div>
+                    <div><span class="detail-label">Def. Station</span><span class="detail-value">LGMK</span></div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 35px;">
+                    <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="voidMel()">VOID COMPLAINT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 3: PRE-FLIGHT -->
+        <div id="view-preflight" class="view">
+            <div class="page-header">
+                <div class="page-title">Pre-Flight</div>
+                <button class="btn-primary disabled" id="btn-accept-aircraft" onclick="openAcceptModal()"><i class="fas fa-plane" id="accept-btn-icon" style="margin-right: 6px;"></i> <span id="accept-btn-text">Accept Aircraft</span></button>
+            </div>
+
+            <div class="section-title">Mandatory Tasks</div>
+            <div class="card-list">
+                <div class="list-item clickable task-item" id="task-flight-data">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-plane-departure" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600; width: 120px;">Flight Data</span>
+                        <div class="flight-data-grid">
+                            <div><div class="fd-label">Flight Date:</div><div class="fd-value" id="fd-date">--</div></div>
+                            <div><div class="fd-label">Flight Number:</div><div class="fd-value" id="fd-num">--</div></div>
+                            <div><div class="fd-label">From - To:</div><div class="fd-value" id="fd-route">--</div></div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+                </div>
+
+                <div class="list-item task-item success">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-equals" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Open and Overdue Items (0)</span>
+                    </div>
+                </div>
+
+                <div class="list-item clickable task-item" id="task-fuel" onclick="openFuelPage()">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-gas-pump" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Fuel Uplift</span>
+                    </div>
+                    <span style="font-size: 13px; color: var(--text-muted);" id="fuel-status-text">Incomplete Fuel Uplift Data <i class="fas fa-chevron-right" style="margin-left: 10px;"></i></span>
+                </div>
+
+                <div class="list-item clickable task-item" id="task-oil" onclick="openOilPage()">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-oil-can" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Before Flight Oil Data</span>
+                    </div>
+                    <span style="font-size: 13px; color: var(--text-muted);" id="oil-status-text">Incomplete Pre-Flight Oil Data <i class="fas fa-chevron-right" style="margin-left: 10px;"></i></span>
+                </div>
+
+                <div class="list-item clickable task-item" id="task-preflight-check" onclick="completePreFlightCheck()">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-check-square" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Pre-Flight Check</span>
+                    </div>
+                    <span style="font-size: 13px; color: var(--text-muted);" id="preflight-status-text">Incomplete Pre-Flight Check <i class="far fa-circle" id="preflight-circle" style="margin-left: 10px; font-size: 16px;"></i></span>
+                </div>
+
+                <div class="list-item task-item" id="task-security">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-shield-alt" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Security Task</span>
+                    </div>
+                    <div style="background: rgba(128,128,128,0.1); border-radius: 8px; padding: 4px; display: flex; gap: 5px;">
+                        <button class="sec-btn" onclick="selectSecurity(this)">Search</button>
+                        <button class="sec-btn" onclick="selectSecurity(this)">Check</button>
+                        <button class="sec-btn" onclick="selectSecurity(this)">UK Check</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">Optional Tasks</div>
+            <div class="card-list">
+                <div class="list-item clickable">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-snowflake" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">De-Icing/Anti-Icing</span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+                </div>
+            </div>
+
+            <div class="section-title">For Your Information</div>
+            <div class="card-list">
+                <div class="list-item clickable" onclick="switchView('view-status', document.querySelectorAll('.menu-item')[1])">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-plane" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Aircraft Status</span>
+                    </div>
+                    <div style="display: flex; gap: 20px; text-align: center; font-size: 11px; color: var(--text-muted);">
+                        <div>Pilot Items<br><strong style="color: var(--text-main); font-size: 13px;" id="count-pilot">0</strong></div>
+                        <div>Maintenance Items<br><strong style="color: var(--text-main); font-size: 13px;" id="count-maint">0</strong></div>
+                        <div>Cabin Items<br><strong style="color: var(--text-main); font-size: 13px;" id="count-cabin">0</strong></div>
+                        <div>Status<br><strong style="color: var(--text-main); font-size: 13px;" id="count-total">0</strong></div>
+                        <i class="fas fa-chevron-right" style="margin-top: 8px;"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="height: 50px;"></div>
+        </div>
+
+        <!-- VISTA 3.1: FUEL PAGE -->
+        <div id="view-fuel" class="view">
+            <div class="page-header">
+                <button class="btn-secondary" style="border: none;" onclick="switchView('view-preflight', document.querySelectorAll('.menu-item')[2])"><i class="fas fa-arrow-left"></i> PRE-FLIGHT</button>
+                <div class="page-title">Fuel Page</div>
+                <button class="btn-primary" onclick="saveFuel()">SAVE</button>
+            </div>
+
+            <div class="fuel-card">
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Date/Time</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="fuel-date" readonly value="20.Aug.2026 12:40">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Remaining Fuel</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fuel-remaining" placeholder="0" oninput="calculateFuel()">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="font-weight: 600; margin-bottom: 20px;"><i class="fas fa-gas-pump" style="color: var(--text-muted);"></i> Fuel Uplift 1</div>
+                
+                <div class="fuel-row" style="align-items: flex-end;">
+                    <div class="fuel-group">
+                        <label>Fuel Type</label>
+                        <div class="input-with-unit">
+                            <select><option>Jet A1</option></select>
+                        </div>
+                    </div>
+                    <div class="fuel-group" style="display: flex; justify-content: flex-end;">
+                        <div class="fuel-btn-group" style="width: 200px;">
+                            <button class="active">Metric</button>
+                            <button>Imperial</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-divider"></div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Density</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fuel-density" value="0.8" step="0.01" oninput="calculateFuel()">
+                            <span class="unit">kg/l</span>
+                        </div>
+                    </div>
+                    <div class="fuel-group"></div>
+                </div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Actual Uplift (Liters)</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fuel-uplift-l" placeholder="0" oninput="calculateFuel()">
+                            <span class="unit">l</span>
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Actual Uplift (Kg)</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fuel-uplift-kg" readonly style="background: rgba(0,0,0,0.1);">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Calculated Difference</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fuel-diff" readonly style="background: rgba(0,0,0,0.1);">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Fuel after Uplift (ECAM)</label>
+                        <div class="input-with-unit" style="margin-bottom: 20px;">
+                            <input type="number" id="fuel-after" placeholder="0" oninput="calculateFuel()">
+                            <span class="unit">kg</span>
+                        </div>
+                        <label>Departure Fuel (Block Fuel)</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fuel-departure" readonly style="background: rgba(0,0,0,0.1); color: var(--ita-blue);">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 3.2: OIL PAGE -->
+        <div id="view-oil" class="view">
+            <div class="page-header">
+                <button class="btn-secondary" style="border: none;" onclick="switchView('view-preflight', document.querySelectorAll('.menu-item')[2])"><i class="fas fa-arrow-left"></i> PRE-FLIGHT</button>
+                <div class="page-title">Before Flight Oil Data</div>
+                <button class="btn-primary" onclick="saveOil()">SAVE</button>
+            </div>
+
+            <div class="fuel-card"> 
+                <div style="font-weight: 600; margin-bottom: 20px;"><i class="fas fa-oil-can" style="color: var(--text-muted);"></i> Oil Before Flight</div>
+                
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Date/Time</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="oil-date" readonly value="20.Aug.2026 12:45">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Engine 1</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="oil-eng1" placeholder="Type in quantity" oninput="checkOilLevels()">
+                            <span class="unit">qt</span>
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Engine 2</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="oil-eng2" placeholder="Type in quantity" oninput="checkOilLevels()">
+                            <span class="unit">qt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px;">Quantity Level</div>
+                    <div style="display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 10px;">
+                        <div style="background-color: var(--danger); flex: 1.4;"></div>
+                        <div style="background-color: var(--warning); flex: 0.2;"></div>
+                        <div style="background-color: var(--success); flex: 0.4;"></div>
+                        <div style="background-color: #fde047; flex: 1;"></div>
+                    </div>
+                    <div style="display: flex; font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: center;">
+                        <div style="flex: 1.4; color: var(--danger);">&lt;14 qt</div>
+                        <div style="flex: 0.2; color: var(--warning);">&lt;16 qt</div>
+                        <div style="flex: 0.4; color: var(--success);">16-20 qt</div>
+                        <div style="flex: 1; color: #fde047;">&gt;20 qt</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 4: POST-FLIGHT PRINCIPALE -->
+        <div id="view-postflight" class="view">
+            <div class="page-header">
+                <div class="page-title">Post-Flight</div>
+                <button class="btn-primary disabled" id="btn-close-flight" onclick="openClosureModal()">Close Flight</button>
+            </div>
+
+            <div class="section-title">Flight Tasks</div>
+            <div class="card-list">
+                <div class="list-item clickable task-item" id="task-pf-flight-data" onclick="openPostFlightData()">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-plane-departure" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600; width: 120px;">Flight Data</span>
+                        <div class="flight-data-grid">
+                            <div><div class="fd-label">Flight Date:</div><div class="fd-value" id="pf-fd-date">20/08/2026</div></div>
+                            <div><div class="fd-label">Flight Number:</div><div class="fd-value" id="pf-fd-num">--</div></div>
+                            <div><div class="fd-label">From - To:</div><div class="fd-value" id="pf-fd-route">--</div></div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+                </div>
+
+                <div class="list-item task-item success">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-equals" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Open and Overdue Items (0)</span>
+                    </div>
+                    <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openAddMelModal()">+ CREATE COMPLAINT</button>
+                </div>
+
+                <div class="list-item task-item" id="task-autoland">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-plane-arrival" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Autoland</span>
+                    </div>
+                    <div style="background: rgba(128,128,128,0.1); border-radius: 8px; padding: 4px; display: flex; gap: 5px;">
+                        <button class="sec-btn" onclick="selectAutoland(this, 'Successful')">Successful</button>
+                        <button class="sec-btn" onclick="selectAutoland(this, 'Failed')">Failed</button>
+                        <button class="sec-btn" onclick="selectAutoland(this, 'No')">No</button>
+                    </div>
+                </div>
+
+                <div class="list-item clickable task-item" id="task-arrival-fuel" onclick="openArrivalFuelPage()">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-gas-pump" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Arrival Fuel</span>
+                    </div>
+                    <span style="font-size: 13px; color: var(--text-muted);" id="arrival-fuel-status">Incomplete Arrival Fuel <i class="fas fa-chevron-right" style="margin-left: 10px;"></i></span>
+                </div>
+            </div>
+
+            <div class="section-title">Optional Tasks</div>
+            <div class="card-list">
+                <div class="list-item clickable">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-snowflake" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">De-Icing/Anti-Icing</span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+                </div>
+            </div>
+
+            <div class="section-title">For Your Information</div>
+            <div class="card-list">
+                <div class="list-item clickable" onclick="switchView('view-status', document.querySelectorAll('.menu-item')[1])">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-plane" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Aircraft Status</span>
+                    </div>
+                    <div style="display: flex; gap: 20px; text-align: center; font-size: 11px; color: var(--text-muted);">
+                        <div>Pilot Items<br><strong style="color: var(--text-main); font-size: 13px;" id="pf-count-pilot">0</strong></div>
+                        <div>Maintenance Items<br><strong style="color: var(--text-main); font-size: 13px;" id="pf-count-maint">0</strong></div>
+                        <div>Cabin Items<br><strong style="color: var(--text-main); font-size: 13px;" id="pf-count-cabin">0</strong></div>
+                        <div>Status<br><strong style="color: var(--text-main); font-size: 13px;" id="pf-count-total">0</strong></div>
+                        <i class="fas fa-chevron-right" style="margin-top: 8px;"></i>
+                    </div>
+                </div>
+                <div class="list-item clickable">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-check-circle" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Closed Complaints</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Recently Closed <strong style="color: var(--text-main);">0</strong> <i class="fas fa-chevron-right" style="margin-left: 10px;"></i></div>
+                </div>
+                <div class="list-item clickable">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-chair" style="color: var(--text-muted); width: 20px; text-align: center;"></i>
+                        <span style="font-weight: 600;">Cabin Items</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Open <strong>0</strong> | Accepted <strong>0</strong> | Deferred <strong>0</strong> | Recently Closed <strong>2</strong> <i class="fas fa-chevron-right" style="margin-left: 10px;"></i></div>
+                </div>
+            </div>
+            
+            <div style="height: 50px;"></div>
+        </div>
+
+        <!-- VISTA 4.1: POST-FLIGHT DATA PAGE -->
+        <div id="view-pf-flight-data" class="view">
+            <div class="page-header">
+                <button class="btn-secondary" style="border: none;" onclick="switchView('view-postflight')"><i class="fas fa-arrow-left"></i> POST-FLIGHT</button>
+                <div class="page-title">Flight Data</div>
+                <button class="btn-primary" onclick="savePostFlightData()">Save</button>
+            </div>
+
+            <div class="fuel-card">
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Date of Flight</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="pf-data-date" readonly value="20.Aug.2026 15:37">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Flight Number</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="pf-data-num" readonly style="background: rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
+                    <div class="fuel-group" style="display: flex; gap: 10px;">
+                        <div style="flex: 1;">
+                            <label>From</label>
+                            <div class="input-with-unit">
+                                <input type="text" id="pf-data-dep" readonly style="background: rgba(0,0,0,0.1);">
+                            </div>
+                        </div>
+                        <div style="flex: 1;">
+                            <label>To</label>
+                            <div class="input-with-unit">
+                                <input type="text" id="pf-data-arr" readonly style="background: rgba(0,0,0,0.1);">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-divider"></div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Scheduled Time of Departure</label>
+                        <div class="input-with-unit">
+                            <input type="time" id="pf-sched-dep" step="60" pattern="[0-9]{2}:[0-9]{2}">
+                        </div>
+                    </div>
+                    <div class="fuel-group"></div>
+                </div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Time Off-block</label>
+                        <div class="input-with-unit">
+                            <input type="time" id="pf-off-block" step="60" pattern="[0-9]{2}:[0-9]{2}" oninput="calculateTimes()">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Time TakeOff</label>
+                        <div class="input-with-unit">
+                            <input type="time" id="pf-takeoff" step="60" pattern="[0-9]{2}:[0-9]{2}" oninput="calculateTimes()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Time On-block</label>
+                        <div class="input-with-unit">
+                            <input type="time" id="pf-on-block" step="60" pattern="[0-9]{2}:[0-9]{2}" oninput="calculateTimes()">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Time Landing</label>
+                        <div class="input-with-unit">
+                            <input type="time" id="pf-landing" step="60" pattern="[0-9]{2}:[0-9]{2}" oninput="calculateTimes()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Block Time</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="pf-block-time" readonly style="background: rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Flight Time</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="pf-flight-time" readonly style="background: rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-divider"></div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Full Stop Landing</label>
+                        <div style="display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); overflow: hidden;">
+                            <button onclick="adjustLandings('full-stop', -1)" style="background:transparent; border:none; color:var(--text-main); padding: 12px 20px; cursor:pointer;"><i class="fas fa-minus"></i></button>
+                            <input type="text" id="landings-full" value="1" readonly style="border:none; text-align:center; background:transparent; font-weight:600; color:var(--text-main); width:100%;">
+                            <button onclick="adjustLandings('full-stop', 1)" style="background:transparent; border:none; color:var(--text-main); padding: 12px 20px; cursor:pointer;"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Touch & Go</label>
+                        <div style="display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); overflow: hidden;">
+                            <button onclick="adjustLandings('touch-go', -1)" style="background:transparent; border:none; color:var(--text-main); padding: 12px 20px; cursor:pointer;"><i class="fas fa-minus"></i></button>
+                            <input type="text" id="landings-touch" value="0" readonly style="border:none; text-align:center; background:transparent; font-weight:600; color:var(--text-main); width:100%;">
+                            <button onclick="adjustLandings('touch-go', 1)" style="background:transparent; border:none; color:var(--text-main); padding: 12px 20px; cursor:pointer;"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Total Landings</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="landings-total" readonly value="1" style="background: rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-divider"></div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Delay Code 1 / Time</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="delay-code-1" placeholder="Code" style="width: 35%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600;">
+                            <input type="number" id="delay-time-1" placeholder="Mins" oninput="calculateTotalDelay()" style="width: 65%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600;">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Delay Code 2 / Time</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="delay-code-2" placeholder="Code" style="width: 35%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600;">
+                            <input type="number" id="delay-time-2" placeholder="Mins" oninput="calculateTotalDelay()" style="width: 65%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Delay Code 3 / Time</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="delay-code-3" placeholder="Code" style="width: 35%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600;">
+                            <input type="number" id="delay-time-3" placeholder="Mins" oninput="calculateTotalDelay()" style="width: 65%; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600;">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Calculated Total Delay</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="calc-total-delay" readonly value="0 min" style="background: rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VISTA 4.2: ARRIVAL FUEL PAGE -->
+        <div id="view-arrival-fuel" class="view">
+            <div class="page-header">
+                <button class="btn-secondary" style="border: none;" onclick="switchView('view-postflight')"><i class="fas fa-arrow-left"></i> POST-FLIGHT</button>
+                <div class="page-title">Arrival Fuel</div>
+                <button class="btn-primary" onclick="saveArrivalFuelPage()">Save</button>
+            </div>
+
+            <div class="fuel-card">
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Date / Time</label>
+                        <div class="input-with-unit">
+                            <input type="text" readonly value="20.Aug.2026 19:24">
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Depart. Fuel</label>
+                        <div class="input-with-unit">
+                            <input type="text" id="arr-depart-fuel" readonly style="background: rgba(0,0,0,0.1);">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fuel-row">
+                    <div class="fuel-group">
+                        <label>Fuel Burnt</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="arr-fuel-burnt" placeholder="0" oninput="calculateArrivalFuel()">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                    <div class="fuel-group">
+                        <label>Arrival Fuel (Inserisci valore)</label>
+                        <div class="input-with-unit">
+                            <!-- Inserendo l'Arrival Fuel, calcoliamo in automatico il Burnt -->
+                            <input type="number" id="arr-fuel-final" placeholder="0" oninput="calculateBurntFromArrival()">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODALI -->
+    <div class="modal-overlay" id="startFlightModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>Start Flight</div>
+                <button class="btn-secondary" style="border: none; padding: 0;" onclick="closeStartModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="input-group">
+                <label>Flight Number</label>
+                <input type="text" id="flightNumber" placeholder="e.g. AZ0750" style="text-transform: uppercase;">
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>From</label>
+                    <input type="text" id="depStation" placeholder="LIRF" style="text-transform: uppercase;" maxlength="4">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>To</label>
+                    <input type="text" id="arrStation" placeholder="LGMK" style="text-transform: uppercase;" maxlength="4">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn-primary" onclick="startFlight()">START FLIGHT</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="addMelModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>Add Deferred Defect</div>
+                <button class="btn-secondary" style="border: none; padding: 0;" onclick="closeAddMelModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="input-group">
+                <label>Defect Type</label>
+                <select id="addType">
+                    <option value="Pilot">Pilot</option>
+                    <option value="Cabin">Cabin</option>
+                    <option value="Maintenance">Maintenance</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>ATA Chapter</label>
+                <input type="text" id="addAta" placeholder="e.g. 25">
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <input type="text" id="addDesc" placeholder="e.g. TRAYTABLE INOP" style="text-transform: uppercase;">
+            </div>
+            <div class="input-group">
+                <label>Repair Interval Category</label>
+                <select id="addCat">
+                    <option value="A">Category A</option>
+                    <option value="B">Category B</option>
+                    <option value="C">Category C</option>
+                    <option value="D" selected>Category D</option>
+                </select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn-primary" onclick="addMel()">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="acceptModal">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <div style="font-size: 16px;">Commander's Acceptance</div>
+                <button class="btn-secondary" style="border: none; padding: 0;" onclick="closeAcceptModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.4;">
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 18px; margin-top: 2px;"></i>
+                <div>Check here to confirm that the Pre-Flight Inspection has been performed. Fuel/Oil, ATL state and Security Task are all satisfactory before flight. Aircraft Status Report (ASR) is checked and there are no overdue and due maintenance items for the intended flight. Applicable MEL items (if any) have been reviewed; limitations, restrictions, operational procedures are applied as prescribed in the MEL.</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 600;">
+                <span>You are about to accept aircraft. Please sign below:</span>
+                <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="clearSignature()">Clear</button>
+            </div>
+            <div style="border: 1px solid var(--border-color); border-radius: 8px; background: #ffffff; overflow: hidden; margin-bottom: 20px;">
+                <canvas id="sig-canvas" width="450" height="130" style="display: block; cursor: crosshair;"></canvas>
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button class="btn-primary disabled" id="btn-final-accept" onclick="acceptAircraftFinal()">Accept Aircraft</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="closureModal">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <div style="font-size: 16px;">Commander's Closure</div>
+                <button class="btn-secondary" style="border: none; padding: 0;" onclick="closeClosureModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.4;">
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 18px; margin-top: 2px;"></i>
+                <div>Check here to confirm that all required post-flight data has been entered. OOOI data, arrival fuel, autoland status/report where applicable, aircraft status and operational entries have been reviewed and are satisfactory for closing this flight.</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 600;">
+                <span>You are about to close flight. Please sign below:</span>
+                <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="clearClosureSignature()">Clear</button>
+            </div>
+            <div style="border: 1px solid var(--border-color); border-radius: 8px; background: #ffffff; overflow: hidden; margin-bottom: 20px;">
+                <canvas id="closure-sig-canvas" width="450" height="130" style="display: block; cursor: crosshair;"></canvas>
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button class="btn-primary disabled" id="btn-final-close" onclick="closeFlightFinal()">Close Flight</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TODAY = new Date("2026-08-20T12:00:00Z"); 
+        let currentFlightNum = "", currentDep = "", currentArr = "";
+
+        function formatDateWizz(dateObj) {
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            let d = dateObj.getDate().toString().padStart(2, '0');
+            let m = months[dateObj.getMonth()];
+            let y = dateObj.getFullYear();
+            return `${d}.${m}.${y}`;
+        }
+
+        function calculateDueDates(category) {
+            let days = 0;
+            switch(category) {
+                case 'A': days = 1; break;
+                case 'B': days = 3; break;
+                case 'C': days = 10; break;
+                case 'D': days = 120; break;
+            }
+            let dueDateObj = new Date(TODAY);
+            dueDateObj.setDate(dueDateObj.getDate() + days);
+            return { dueDateFormatted: formatDateWizz(dueDateObj), daysValue: days };
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const icon = document.querySelector('#themeBtn i');
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                icon.className = 'fas fa-moon';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function switchView(viewId, menuItem) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            if(menuItem) {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                menuItem.classList.add('active');
+            }
+            if(window.innerWidth < 1000) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        let currentMelId = null;
+        let mels = []; 
+
+        function renderMels() {
+            const container = document.getElementById('mel-container');
+            container.innerHTML = ''; 
+
+            let countPilot = 0, countCabin = 0, countMaint = 0;
+
+            if (mels.length === 0) {
+                container.innerHTML = '<div class="list-item" style="color: var(--text-muted); font-style: italic;">no items</div>';
+            } else {
+                mels.forEach(mel => {
+                    if(mel.type === 'Pilot') countPilot++;
+                    if(mel.type === 'Cabin') countCabin++;
+                    if(mel.type === 'Maintenance') countMaint++;
+
+                    let div = document.createElement('div');
+                    div.className = 'list-item clickable';
+                    div.style.borderLeft = '4px solid var(--warning)';
+                    div.onclick = () => openMelDetail(mel.id);
+                    
+                    div.innerHTML = `
+                        <div>
+                            <div style="margin-bottom: 6px;">
+                                <span class="mel-badge">${mel.wo}</span> 
+                                <span class="mel-badge" style="background:transparent;">CAT ${mel.category}</span>
+                                <span class="role-badge">${mel.type}</span>
+                            </div>
+                            <div style="font-weight: 600;">${mel.desc}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Opened ${mel.opened} &nbsp;&nbsp; Due at ${mel.due}</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            document.getElementById('count-pilot').innerText = countPilot;
+            document.getElementById('count-cabin').innerText = countCabin;
+            document.getElementById('count-maint').innerText = countMaint;
+            document.getElementById('count-total').innerText = (countPilot + countCabin + countMaint);
+            updatePostFlightCounters(countPilot, countCabin, countMaint);
+        }
+
+        function openMelDetail(id) {
+            let mel = mels.find(m => m.id === id);
+            if(!mel) return;
+            currentMelId = id;
+            
+            document.getElementById('detail-wo').innerText = mel.wo;
+            document.getElementById('detail-desc').innerText = mel.desc;
+            document.getElementById('detail-opened').innerText = mel.opened;
+            document.getElementById('detail-due').innerText = mel.due;
+            document.getElementById('detail-issue-sta').innerText = "LIRF";
+            document.getElementById('detail-ata').innerText = "ATA " + mel.ata;
+            document.getElementById('detail-melref').innerText = mel.ata + "-XX-XX";
+            document.getElementById('detail-cat').innerText = "MEL " + mel.category;
+            document.getElementById('detail-togo').innerText = mel.daysValue + " Days";
+            document.getElementById('detail-def-val').innerText = mel.daysValue + " Days";
+            
+            switchView('view-mel-detail');
+        }
+
+        function voidMel() {
+            if(confirm("Are you sure you want to VOID this complaint?")) {
+                mels = mels.filter(mel => mel.id !== currentMelId);
+                renderMels();
+                switchView('view-status', document.querySelectorAll('.menu-item')[1]);
+            }
+        }
+
+        function openAddMelModal() { document.getElementById('addMelModal').style.display = 'flex'; }
+        function closeAddMelModal() { document.getElementById('addMelModal').style.display = 'none'; }
+        
+        function addMel() {
+            let type = document.getElementById('addType').value;
+            let ata = document.getElementById('addAta').value || "00";
+            let desc = document.getElementById('addDesc').value.toUpperCase();
+            let cat = document.getElementById('addCat').value;
+            if(!desc) return;
+
+            let dates = calculateDueDates(cat);
+            mels.push({
+                id: Date.now(), type: type, wo: "WO." + Math.floor(1000000 + Math.random() * 9000000),
+                ata: ata, desc: desc, category: cat, opened: formatDateWizz(TODAY),
+                due: dates.dueDateFormatted, daysValue: dates.daysValue
+            });
+            
+            document.getElementById('addAta').value = '';
+            document.getElementById('addDesc').value = '';
+            closeAddMelModal();
+            renderMels();
+        }
+
+        function openStartModal() { document.getElementById('startFlightModal').style.display = 'flex'; }
+        function closeStartModal() { document.getElementById('startFlightModal').style.display = 'none'; }
+        
+        function startFlight() {
+            let fn = document.getElementById('flightNumber').value.toUpperCase();
+            let dep = document.getElementById('depStation').value.toUpperCase();
+            let arr = document.getElementById('arrStation').value.toUpperCase();
+            
+            if(fn && dep && arr) {
+                currentFlightNum = fn;
+                currentDep = dep;
+                currentArr = arr;
+
+                document.getElementById('nav-flight-info').innerHTML = `
+                    <span style="color: var(--ita-blue); font-weight: 700;">${fn}</span>
+                    <span>20/08/2026</span><span>EI-INB</span><span>${dep}</span><span>${arr}</span><span>A20N</span><span>Y180</span>
+                `;
+                document.getElementById('fd-date').innerText = formatDateWizz(TODAY);
+                document.getElementById('fd-num').innerText = fn;
+                document.getElementById('fd-route').innerText = `${dep} - ${arr}`;
+                document.getElementById('task-flight-data').classList.add('success');
+            }
+            closeStartModal();
+            switchView('view-preflight', document.querySelectorAll('.menu-item')[2]);
+            checkPreFlightCompletion();
+        }
+
+        function selectSecurity(btn) {
+            let buttons = btn.parentElement.querySelectorAll('.sec-btn');
+            buttons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('task-security').classList.add('success');
+            checkPreFlightCompletion();
+        }
+
+        function completePreFlightCheck() {
+            let taskRow = document.getElementById('task-preflight-check');
+            let statusText = document.getElementById('preflight-status-text');
+            taskRow.classList.remove('warning', 'danger');
+            taskRow.classList.add('success');
+            statusText.innerHTML = `Pre-Flight Check Completed <i class="fas fa-check-circle" style="color: var(--success); margin-left: 10px; font-size: 16px;"></i>`;
+            checkPreFlightCompletion();
+        }
+
+        function openFuelPage() { switchView('view-fuel'); }
+        function calculateFuel() {
+            let remaining = parseFloat(document.getElementById('fuel-remaining').value) || 0;
+            let upliftLiters = parseFloat(document.getElementById('fuel-uplift-l').value) || 0;
+            let density = parseFloat(document.getElementById('fuel-density').value) || 0.8;
+            let fuelAfter = parseFloat(document.getElementById('fuel-after').value) || 0;
+
+            let upliftKg = Math.round(upliftLiters * density);
+            let difference = fuelAfter - (remaining + upliftKg);
+            
+            document.getElementById('fuel-uplift-kg').value = upliftKg;
+            document.getElementById('fuel-diff').value = difference; 
+            document.getElementById('fuel-departure').value = fuelAfter; 
+        }
+
+        function saveFuel() {
+            let departureFuel = document.getElementById('fuel-departure').value;
+            if(departureFuel && departureFuel > 0) {
+                let statusText = document.getElementById('fuel-status-text');
+                statusText.innerHTML = `Block Fuel: <strong style="color: var(--text-main);">${departureFuel} kg</strong> <i class="fas fa-check-circle" style="color: var(--success); margin-left: 10px; font-size: 16px;"></i>`;
+                document.getElementById('task-fuel').classList.add('success');
+                switchView('view-preflight', document.querySelectorAll('.menu-item')[2]);
+                checkPreFlightCompletion();
+            } else {
+                alert("Please fill in the 'Fuel after Uplift' field before saving.");
+            }
+        }
+
+        function openOilPage() { switchView('view-oil'); }
+        function checkOilLevels() {
+            ['oil-eng1', 'oil-eng2'].forEach(id => {
+                let input = document.getElementById(id);
+                let val = parseFloat(input.value);
+                if (isNaN(val)) input.style.borderLeft = "";
+                else if (val < 14) input.style.borderLeft = "4px solid var(--danger)";
+                else if (val >= 14 && val < 16) input.style.borderLeft = "4px solid var(--warning)";
+                else if (val >= 16 && val <= 20) input.style.borderLeft = "4px solid var(--success)";
+                else input.style.borderLeft = "4px solid #fde047";
+            });
+        }
+
+        function saveOil() {
+            let eng1Val = document.getElementById('oil-eng1').value;
+            let eng2Val = document.getElementById('oil-eng2').value;
+            if(eng1Val && eng2Val) {
+                let statusText = document.getElementById('oil-status-text');
+                statusText.innerHTML = `ENG 1: ${eng1Val} qt | ENG 2: ${eng2Val} qt <i class="fas fa-check-circle" style="color: var(--success); margin-left: 10px; font-size: 16px;"></i>`;
+                document.getElementById('task-oil').classList.add('success');
+                switchView('view-preflight', document.querySelectorAll('.menu-item')[2]);
+                checkPreFlightCompletion();
+            } else {
+                alert("Please fill in oil quantities for both engines.");
+            }
+        }
+
+        function checkPreFlightCompletion() {
+            let flightDataOk = document.getElementById('task-flight-data').classList.contains('success');
+            let fuelOk = document.getElementById('task-fuel').classList.contains('success');
+            let oilOk = document.getElementById('task-oil').classList.contains('success');
+            let checkOk = document.getElementById('task-preflight-check').classList.contains('success');
+            let secOk = document.getElementById('task-security').classList.contains('success');
+
+            let acceptBtn = document.getElementById('btn-accept-aircraft');
+            if(flightDataOk && fuelOk && oilOk && checkOk && secOk) {
+                acceptBtn.classList.remove('disabled');
+            } else {
+                acceptBtn.classList.add('disabled');
+            }
+        }
+
+        let canvas, ctx, painting = false;
+        function openAcceptModal() {
+            let acceptBtn = document.getElementById('btn-accept-aircraft');
+            if(acceptBtn.classList.contains('disabled')) return;
+
+            document.getElementById('acceptModal').style.display = 'flex';
+            setTimeout(() => {
+                canvas = document.getElementById('sig-canvas');
+                ctx = canvas.getContext('2d');
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 2;
+                ctx.lineCap = "round";
+
+                canvas.onmousedown = startPosition;
+                canvas.onmouseup = finishedPosition;
+                canvas.onmousemove = draw;
+
+                canvas.ontouchstart = (e) => { startPosition(e.touches[0]); e.preventDefault(); };
+                canvas.ontouchend = finishedPosition;
+                canvas.ontouchmove = (e) => { draw(e.touches[0]); e.preventDefault(); };
+            }, 100);
+        }
+
+        function closeAcceptModal() { document.getElementById('acceptModal').style.display = 'none'; }
+        function startPosition(e) { painting = true; draw(e); }
+        function finishedPosition() { 
+            painting = false; 
+            ctx.beginPath(); 
+            document.getElementById('btn-final-accept').classList.remove('disabled');
+        }
+        function draw(e) {
+            if (!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+        function clearSignature() {
+            if(ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                document.getElementById('btn-final-accept').classList.add('disabled');
+            }
+        }
+        function acceptAircraftFinal() {
+            let finalBtn = document.getElementById('btn-final-accept');
+            if(finalBtn.classList.contains('disabled')) return;
+            closeAcceptModal();
+
+            let mainAcceptBtn = document.getElementById('btn-accept-aircraft');
+            mainAcceptBtn.classList.remove('disabled');
+            mainAcceptBtn.style.backgroundColor = "var(--success)";
+            mainAcceptBtn.style.pointerEvents = "none";
+            
+            document.getElementById('accept-btn-icon').className = "fas fa-check-circle";
+            document.getElementById('accept-btn-text').innerText = "Aircraft Accepted";
+            alert("Aircraft successfully accepted by Commander!");
+        }
+
+        // --- POST-FLIGHT LOGIC ---
+        function selectAutoland(btn, status) {
+            let buttons = btn.parentElement.querySelectorAll('.sec-btn');
+            buttons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('task-autoland').classList.add('success');
+            checkPostFlightCompletion();
+        }
+
+        // --- ARRIVAL FUEL PAGE LOGIC (CORRETTO: INSERISCI ARRIVAL FUEL E CALCOLA BURNT) ---
+        let capturedBlockFuel = "8076";
+
+        function openArrivalFuelPage() {
+            let savedFuelInput = document.getElementById('fuel-departure');
+            if(savedFuelInput && savedFuelInput.value) {
+                capturedBlockFuel = savedFuelInput.value;
+            }
+            document.getElementById('arr-depart-fuel').value = capturedBlockFuel;
+            document.getElementById('arr-fuel-burnt').value = '';
+            document.getElementById('arr-fuel-final').value = '';
+            switchView('view-arrival-fuel');
+        }
+
+        function calculateArrivalFuel() {
+            // Lasciato vuoto o per compatibilità, ora usiamo calculateBurntFromArrival
+        }
+
+        function calculateBurntFromArrival() {
+            let depart = parseFloat(capturedBlockFuel) || 0;
+            let arrival = parseFloat(document.getElementById('arr-fuel-final').value) || 0;
+            let burnt = depart - arrival;
+            
+            document.getElementById('arr-fuel-burnt').value = burnt >= 0 ? burnt : 0;
+        }
+
+        function saveArrivalFuelPage() {
+            let finalArrival = document.getElementById('arr-fuel-final').value;
+            if(finalArrival !== "") {
+                document.getElementById('arrival-fuel-status').innerHTML = `${finalArrival} kg <i class="fas fa-check-circle" style="color: var(--success); margin-left: 10px;"></i>`;
+                document.getElementById('task-arrival-fuel').classList.add('success');
+                switchView('view-postflight', document.querySelectorAll('.menu-item')[3]);
+                checkPostFlightCompletion();
+            } else {
+                alert("Please enter arrival fuel quantities.");
+            }
+        }
+
+        function checkPostFlightCompletion() {
+            let autolandOk = document.getElementById('task-autoland').classList.contains('success');
+            let fuelOk = document.getElementById('task-arrival-fuel').classList.contains('success');
+            let closeBtn = document.getElementById('btn-close-flight');
+
+            if(autolandOk && fuelOk) {
+                closeBtn.classList.remove('disabled');
+            } else {
+                closeBtn.classList.add('disabled');
+            }
+        }
+
+        function updatePostFlightCounters(p, c, m) {
+            document.getElementById('pf-count-pilot').innerText = p;
+            document.getElementById('pf-count-cabin').innerText = c;
+            document.getElementById('pf-count-maint').innerText = m;
+            document.getElementById('pf-count-total').innerText = (p + c + m);
+        }
+
+        let closureCanvas, closureCtx, closurePainting = false;
+        function openClosureModal() {
+            let closeBtn = document.getElementById('btn-close-flight');
+            if(closeBtn.classList.contains('disabled')) return;
+
+            document.getElementById('closureModal').style.display = 'flex';
+            setTimeout(() => {
+                closureCanvas = document.getElementById('closure-sig-canvas');
+                closureCtx = closureCanvas.getContext('2d');
+                closureCtx.strokeStyle = "#000000";
+                closureCtx.lineWidth = 2;
+                closureCtx.lineCap = "round";
+
+                closureCanvas.onmousedown = startClosurePos;
+                closureCanvas.onmouseup = finishedClosurePos;
+                closureCanvas.onmousemove = drawClosure;
+
+                closureCanvas.ontouchstart = (e) => { startClosurePos(e.touches[0]); e.preventDefault(); };
+                closureCanvas.ontouchend = finishedClosurePos;
+                closureCanvas.ontouchmove = (e) => { drawClosure(e.touches[0]); e.preventDefault(); };
+            }, 100);
+        }
+
+        function closeClosureModal() { document.getElementById('closureModal').style.display = 'none'; }
+        
+        function startClosurePos(e) { closurePainting = true; drawClosure(e); }
+        function finishedClosurePos() { 
+            closurePainting = false; 
+            closureCtx.beginPath(); 
+            document.getElementById('btn-final-close').classList.remove('disabled');
+        }
+        function drawClosure(e) {
+            if (!closurePainting) return;
+            const rect = closureCanvas.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            closureCtx.lineTo(x, y);
+            closureCtx.stroke();
+            closureCtx.beginPath();
+            closureCtx.moveTo(x, y);
+        }
+        function clearClosureSignature() {
+            if(closureCtx) {
+                closureCtx.clearRect(0, 0, closureCanvas.width, closureCanvas.height);
+                document.getElementById('btn-final-close').classList.add('disabled');
+            }
+        }
+        function closeFlightFinal() {
+            let finalBtn = document.getElementById('btn-final-close');
+            if(finalBtn.classList.contains('disabled')) return;
+            closeClosureModal();
+
+            let mainCloseBtn = document.getElementById('btn-close-flight');
+            mainCloseBtn.classList.remove('disabled');
+            mainCloseBtn.style.backgroundColor = "var(--success)";
+            mainCloseBtn.style.pointerEvents = "none";
+            mainCloseBtn.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 6px;"></i> Flight Closed';
+            alert("Flight successfully closed and signed by Commander!");
+        }
+
+        function openPostFlightData() {
+            document.getElementById('pf-data-num').value = currentFlightNum || "AZ0750";
+            document.getElementById('pf-data-dep').value = currentDep || "LIRF";
+            document.getElementById('pf-data-arr').value = currentArr || "LGMK";
+            switchView('view-pf-flight-data');
+        }
+
+        function timeToMinutes(tStr) {
+            if(!tStr || !tStr.includes(':')) return 0;
+            let parts = tStr.split(':');
+            return (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+        }
+
+        function minutesToTime(mins) {
+            if(isNaN(mins) || mins < 0) return "00:00";
+            let h = Math.floor(mins / 60).toString().padStart(2, '0');
+            let m = (mins % 60).toString().padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
+        function calculateTimes() {
+            let offBlock = timeToMinutes(document.getElementById('pf-off-block').value);
+            let onBlock = timeToMinutes(document.getElementById('pf-on-block').value);
+            let takeoff = timeToMinutes(document.getElementById('pf-takeoff').value);
+            let landing = timeToMinutes(document.getElementById('pf-landing').value);
+
+            if(onBlock > offBlock) {
+                document.getElementById('pf-block-time').value = minutesToTime(onBlock - offBlock);
+            }
+            if(landing > takeoff) {
+                document.getElementById('pf-flight-time').value = minutesToTime(landing - takeoff);
+            }
+        }
+
+        function calculateTotalDelay() {
+            let t1 = parseInt(document.getElementById('delay-time-1').value) || 0;
+            let t2 = parseInt(document.getElementById('delay-time-2').value) || 0;
+            let t3 = parseInt(document.getElementById('delay-time-3').value) || 0;
+            
+            let totalMins = t1 + t2 + t3;
+            document.getElementById('calc-total-delay').value = totalMins + " min";
+        }
+
+        function adjustLandings(type, change) {
+            let fullInput = document.getElementById('landings-full');
+            let touchInput = document.getElementById('landings-touch');
+            let totalInput = document.getElementById('landings-total');
+
+            let full = parseInt(fullInput.value) || 0;
+            let touch = parseInt(touchInput.value) || 0;
+
+            if(type === 'full-stop') {
+                full = Math.max(0, full + change);
+                fullInput.value = full;
+            } else if(type === 'touch-go') {
+                touch = Math.max(0, touch + change);
+                touchInput.value = touch;
+            }
+
+            totalInput.value = full + touch;
+        }
+
+        function savePostFlightData() {
+            let fNum = document.getElementById('pf-data-num').value;
+            let dep = document.getElementById('pf-data-dep').value;
+            let arr = document.getElementById('pf-data-arr').value;
+
+            document.getElementById('pf-fd-num').innerText = fNum;
+            document.getElementById('pf-fd-route').innerText = `${dep} - ${arr}`;
+            document.getElementById('task-pf-flight-data').classList.add('success');
+
+            switchView('view-postflight', document.querySelectorAll('.menu-item')[3]);
+            checkPostFlightCompletion();
+        }
+
+        window.onload = renderMels;
+    </script>
+</body>
+</html>
